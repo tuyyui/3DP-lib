@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <iostream>
+#include "include/3DEngine.h"
 
 struct Vec3
 {
@@ -59,16 +60,6 @@ void clamp255(Vec3 &col)
     col.z = (col.z > 255) ? 255 : (col.z < 0) ? 0 : col.z;
 }
 
-namespace Engine
-{
-    struct Test
-    {
-        Test(std::string name) : _name(name){};
-        std::string _name;
-        const std::string getname() { return _name; }
-    };
-} // namespace Engine
-
 int main()
 {
 
@@ -78,9 +69,6 @@ int main()
     const Vec3 white(255, 255, 255);
     const Vec3 black(0, 0, 0);
     const Vec3 red(255, 0, 0);
-    Engine::Test _t("Justin");
-    auto testing = _t.getname();
-    std::cout << testing << std::endl;
 
     const Sphere sphere(Vec3(W * 0.5, H * 0.5, 50), 50);
     const Sphere light(Vec3(0, 0, 50), 1);
