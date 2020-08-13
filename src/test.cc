@@ -2,7 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <iostream>
-#include "include/3DEngine.h"
+#include "include/raycastengine.h"
 
 struct Vec3
 {
@@ -63,6 +63,15 @@ void clamp255(Vec3 &col)
 int main()
 {
 
+    vecfloat vect1(10.2, 2.2, 5.3);
+    vecdouble vect2(8.5);
+    vecdouble vect3(4.5, 3.4, 7.9);
+
+    double product = vect3.dot_product(vect2);
+
+    std::cout << product << std::endl;
+
+    /*
     const int H = 500;
     const int W = 500;
 
@@ -102,4 +111,5 @@ int main()
                 << (int)pix_col.z << '\n';
         }
     }
+    */
 }
