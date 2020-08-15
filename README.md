@@ -1,7 +1,2 @@
-# 3DP-lib
-3D ray-tracing render
-
-
-#Raytracing Engine
-
-Do not label your h file as 3D engine.
+# RayCast-lib
+Ray-tracing renderer library code in C++.
