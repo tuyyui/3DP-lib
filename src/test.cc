@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include "include/raycastengine.h"
+#include "include/ray.h"
 
 struct Vec3
 {
@@ -59,6 +60,7 @@ void clamp255(Vec3 &col)
     col.y = (col.y > 255) ? 255 : (col.y < 0) ? 0 : col.y;
     col.z = (col.z > 255) ? 255 : (col.z < 0) ? 0 : col.z;
 }
+
 vecfloat color(const ray &r)
 {
     //THERE'S A BUG IN THIS FUNCTION THAT PRINTS TURNS THE ENDING FUNCTION INTO NAN.
@@ -72,13 +74,14 @@ vecfloat color(const ray &r)
 
 int main()
 {
-
+    /*
     int nx = 200;
     int ny = 100;
     std::ofstream out("out.ppm");
 
     out << "P3\n"
         << nx << " " << ny << "\n255\n";
+        */
 
     vecfloat lower_left_corner(-2.0, -1.0, -1.0);
     vecfloat _horizontial(4.0, 0.0, 0.0);
@@ -113,4 +116,6 @@ int main()
         }
     }
 */
+
+    return 0;
 }
