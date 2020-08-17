@@ -59,57 +59,58 @@ void clamp255(Vec3 &col)
     col.y = (col.y > 255) ? 255 : (col.y < 0) ? 0 : col.y;
     col.z = (col.z > 255) ? 255 : (col.z < 0) ? 0 : col.z;
 }
+vecfloat color(const ray &r)
+{
+    //THERE'S A BUG IN THIS FUNCTION THAT PRINTS TURNS THE ENDING FUNCTION INTO NAN.
+    vecfloat unit_direction(0, 0, 0);
+    unit_direction = r.direction() + unit_direction.unit_vector();
+    float t = 0.5 * (unit_direction.get_y() + 1.0);
+    vecfloat a(1.0, 1.0, 1.0);
+    vecfloat b(0.5, 0.7, 1.0);
+    return (a * (1.0 - t)) + (b * t);
+}
 
 int main()
 {
 
-    vecfloat vect1(10.2, 2.2, 5.3);
-    vecdouble vect2(8.5);
-    vecdouble vect3(4.5, 3.4, 7.9);
-
-    double product = vect3.dot_product(vect2);
-
-    std::cout << product << std::endl;
-
-    /*
-    const int H = 500;
-    const int W = 500;
-
-    const Vec3 white(255, 255, 255);
-    const Vec3 black(0, 0, 0);
-    const Vec3 red(255, 0, 0);
-
-    const Sphere sphere(Vec3(W * 0.5, H * 0.5, 50), 50);
-    const Sphere light(Vec3(0, 0, 50), 1);
-
+    int nx = 200;
+    int ny = 100;
     std::ofstream out("out.ppm");
+
     out << "P3\n"
-        << W << ' ' << H << ' ' << "255\n";
+        << nx << " " << ny << "\n255\n";
 
-    double t;
-    Vec3 pix_col(black);
+    vecfloat lower_left_corner(-2.0, -1.0, -1.0);
+    vecfloat _horizontial(4.0, 0.0, 0.0);
+    vecfloat vertical(0.0, 2.0, 0.0);
+    vecfloat origin(0.0, 0.0, 0.0);
+    float u = float(20) / float(60);
+    float v = float(50) / float(40);
+    // Not working as of now due to ray not returning a value.
 
-    for (int y = 0; y < H; ++y)
+    ray r(origin, (lower_left_corner + ((_horizontial * u) + (vertical * v))));
+
+    std::cout << r.direction() << std::endl;
+    std::cout << r.origin();
+    vecfloat col = color(r);
+    std::cout << col << std::endl;
+    /*
+    for (int i = ny - 1; i >= 0; i--)
     {
-        for (int x = 0; x < W; ++x)
+        for (int j = 0; j < nx; j++)
         {
-            pix_col = black;
+            float u = float(j) / float(nx);
+            float v = float(i) / float(ny);
+            // Not working as of now due to ray not returning a value.
+            
+            ray r(origin, (lower_left_corner + ((_horizontial * u) + (vertical * v))));
+            vecfloat col = color(r);
 
-            const Ray ray(Vec3(x, y, 0), Vec3(0, 0, 1));
-            if (sphere.intersect(ray, t))
-            {
-                const Vec3 pi = ray.o + ray.d * t;
-                const Vec3 L = light.c - pi;
-                const Vec3 N = sphere.getNormal(pi);
-                const double dt = dot(L.normalize(), N.normalize());
-
-                pix_col = (red + white * dt) * 0.5;
-                clamp255(pix_col);
-            }
-            out << (int)pix_col.x << ' '
-                << (int)pix_col.y << ' '
-                << (int)pix_col.z << '\n';
+            int ir = int(255.99 * col.get_x());
+            int ig = int(255.99 * col.get_y());
+            int ib = int(255.99 * col.get_z());
+            out << ir << " " << ig << " " << ib << "\n";
         }
     }
-    */
+*/
 }
