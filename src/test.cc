@@ -2,76 +2,31 @@
 #include <fstream>
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include "include/raycastengine.h"
-#include "include/ray.h"
 
-struct Vec3
+#include "include/sphere.h"
+
+#include "include/hittablelist.h"
+
+vecfloat color(const ray &r, hittable *world)
 {
-    double x, y, z;
-    Vec3(double x, double y, double z) : x(x), y(y), z(z) {}
-    Vec3 operator+(const Vec3 &v) const { return Vec3(x + v.x, y + v.y, z + v.z); }
-    Vec3 operator-(const Vec3 &v) const { return Vec3(x - v.x, y - v.y, z - v.z); }
-    Vec3 operator*(double d) const { return Vec3(x * d, y * d, z * d); }
-    Vec3 operator/(double d) const { return Vec3(x / d, y / d, z / d); }
-    Vec3 normalize() const
+    hit_record rec;
+    //vecfloat unit_direction(0, 0, 0);
+    // unit_direction = unit_direction.unit_vector(r.direction());
+
+    // float t = 0.5 * (unit_direction.get_y() + 1.0);
+    if (world->hit(r, 0.0, 100.0f, rec))
     {
-        double mg = sqrt(x * x + y * y + z * z);
-        return Vec3(x / mg, y / mg, z / mg);
+        return vecfloat(rec.normal.get_x() + 1, rec.normal.get_y() + 1, rec.normal.get_z() + 1) * (float)0.5;
     }
-};
-inline double dot(const Vec3 &a, const Vec3 &b)
-{
-    return (a.x * b.x + a.y * b.y + a.z * b.z);
-}
-
-struct Ray
-{
-    Vec3 o, d;
-    Ray(const Vec3 &o, const Vec3 &d) : o(o), d(d) {}
-};
-
-struct Sphere
-{
-    Vec3 c;
-    double r;
-    Sphere(const Vec3 &c, double r) : c(c), r(r) {}
-    Vec3 getNormal(const Vec3 &pi) const { return (pi - c) / r; }
-    bool intersect(const Ray &ray, double &t) const
+    else
     {
-        const Vec3 o = ray.o;
-        const Vec3 d = ray.d;
-        const Vec3 oc = o - c;
-        const double b = 2 * dot(oc, d);
-        const double c = dot(oc, oc) - r * r;
-        double disc = b * b - 4 * c;
-        if (disc < 1e-4)
-            return false;
-        disc = sqrt(disc);
-        const double t0 = -b - disc;
-        const double t1 = -b + disc;
-        t = (t0 < t1) ? t0 : t1;
-        return true;
+        vecfloat unit_direction(0, 0, 0);
+        unit_direction.unit_vector(r.direction());
+        float t = 0.5 * (rec.normal.get_x() + 1.0);
+        return vecfloat(1.0, 1.0, 1.0) * (float)(1.0 - t) + vecfloat(0.5, 0.7, 1.0) * t;
     }
-};
-
-void clamp255(Vec3 &col)
-{
-    col.x = (col.x > 255) ? 255 : (col.x < 0) ? 0 : col.x;
-    col.y = (col.y > 255) ? 255 : (col.y < 0) ? 0 : col.y;
-    col.z = (col.z > 255) ? 255 : (col.z < 0) ? 0 : col.z;
-}
-
-vecfloat color(const ray &r)
-{
-    vecfloat unit_direction(0, 0, 0);
-    unit_direction = unit_direction.unit_vector(r.direction());
-
-    float t = 0.5 * (unit_direction.get_y() + 1.0);
-
-    vecfloat a(1.0, 1.0, 1.0);
-    vecfloat b(0.5, 0.7, 1.0);
-
-    return (a * (1.0 - t)) + (b * t);
 }
 
 int main()
@@ -88,13 +43,14 @@ int main()
     vecfloat _horizontial(4.0, 0.0, 0.0);
     vecfloat vertical(0.0, 2.0, 0.0);
     vecfloat origin(0.0, 0.0, 0.0);
-    float u = float(20) / float(60);
-    float v = float(50) / float(40);
+    hittable *list[2];
+    vecfloat a1(0, 0, 1);
+    vecfloat a2(0, -100.5, -1);
+    list[0] = new sphere(a1, 0.5);
+    list[1] = new sphere(a2, 100);
+    hittable *world = new hittable_list(list, 2);
+
     // Not working as of now due to ray not returning a value.
-
-    ray r(origin, (lower_left_corner + ((_horizontial * u) + (vertical * v))));
-
-    vecfloat col = color(r);
 
     for (int i = ny - 1; i >= 0; i--)
     {
@@ -105,7 +61,7 @@ int main()
             // Not working as of now due to ray not returning a value.
 
             ray r(origin, (lower_left_corner + ((_horizontial * u) + (vertical * v))));
-            vecfloat col = color(r);
+            vecfloat col = color(r, world);
 
             int ir = int(255.99 * col.get_x());
             int ig = int(255.99 * col.get_y());
