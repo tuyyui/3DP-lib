@@ -1,30 +1,68 @@
-
 #include <fstream>
 #include <cmath>
 #include <iostream>
 #include <memory>
+#include <cstdlib>
+#include <ctime>
+#include <random>
 #include "include/raycastengine.h"
 
 #include "include/sphere.h"
 
 #include "include/hittablelist.h"
+#include "include/camera.h"
 
+vecfloat random_in_unit_sphere()
+{
+
+    vecfloat p(0, 0, 0);
+    std::random_device rd;
+
+    std::uniform_real_distribution<> rn1(0, 1);
+    std::uniform_real_distribution<> rn2(0, 1);
+    std::uniform_real_distribution<> rn3(0, 1);
+    while (true)
+    {
+        std::mt19937 gen(rd());
+
+        auto x = rn1(gen);
+        auto y = rn2(gen);
+        auto z = rn3(gen);
+        //  std::cout << x << std::endl;
+        std::cout << x << std::endl;
+        std::cout << y << std::endl;
+        std::cout << z << std::endl;
+        p = (vecfloat((float)x, (float)y, (float)z) * (float)2.0) - vecfloat(1.0f, 1.0f, 1.0f);
+
+        if (p.magnitude() >= 1.0)
+        {
+            std::cout << "it worked" << std::endl;
+            break;
+        }
+    }
+    std::cout << "it broke returning" << std::endl;
+    return p;
+}
 vecfloat color(const ray &r, hittable *world)
 {
+
     hit_record rec;
     //vecfloat unit_direction(0, 0, 0);
     // unit_direction = unit_direction.unit_vector(r.direction());
 
     // float t = 0.5 * (unit_direction.get_y() + 1.0);
-    if (world->hit(r, 0.0, 100.0f, rec))
+    if (world->hit(r, 0.0, 100.0, rec))
     {
-        return vecfloat(rec.normal.get_x() + 1, rec.normal.get_y() + 1, rec.normal.get_z() + 1) * (float)0.5;
+        vecfloat target = (rec.p + rec.normal) + random_in_unit_sphere();
+        //Recursive function that models real time shadows
+        return color(ray(rec.p, target - rec.p), world) * 0.5;
+        //  return vecfloat(rec.normal.get_x() + 1, rec.normal.get_y() + 1, rec.normal.get_z() + 1) * (float)0.5;
     }
     else
     {
         vecfloat unit_direction(0, 0, 0);
         unit_direction.unit_vector(r.direction());
-        float t = 0.5 * (rec.normal.get_x() + 1.0);
+        float t = 0.5 * (rec.normal.get_y() + 1.0);
         return vecfloat(1.0, 1.0, 1.0) * (float)(1.0 - t) + vecfloat(0.5, 0.7, 1.0) * t;
     }
 }
@@ -34,8 +72,14 @@ int main()
 
     int nx = 200;
     int ny = 100;
-    std::ofstream out("out.ppm");
+    float ns = 200;
 
+    std::random_device rd;
+    std::uniform_real_distribution<> rn1(0, 1);
+    std::uniform_real_distribution<> rn2(0, 1);
+    std::uniform_real_distribution<> rn3(0, 1);
+    std::ofstream out("out.ppm");
+    raycaster::camera cam;
     out << "P3\n"
         << nx << " " << ny << "\n255\n";
 
@@ -44,24 +88,34 @@ int main()
     vecfloat vertical(0.0, 2.0, 0.0);
     vecfloat origin(0.0, 0.0, 0.0);
     hittable *list[2];
-    vecfloat a1(0, 0, 1);
+    vecfloat a1(0, 0, -1);
     vecfloat a2(0, -100.5, -1);
     list[0] = new sphere(a1, 0.5);
     list[1] = new sphere(a2, 100);
     hittable *world = new hittable_list(list, 2);
 
-    // Not working as of now due to ray not returning a value.
-
     for (int i = ny - 1; i >= 0; i--)
     {
         for (int j = 0; j < nx; j++)
         {
-            float u = float(j) / float(nx);
-            float v = float(i) / float(ny);
-            // Not working as of now due to ray not returning a value.
+            vecfloat col(0, 0, 0);
+            for (int s = 0; s < ns; s++)
+            {
+                std::mt19937 gen(rd());
+                auto x = rn1(gen);
+                auto y = rn2(gen);
 
-            ray r(origin, (lower_left_corner + ((_horizontial * u) + (vertical * v))));
-            vecfloat col = color(r, world);
+                float u = float(j + x) / float(nx);
+                float v = float(i + y) / float(ny);
+                // Not working as of now due to ray not returning a value.
+
+                ray r(origin, (lower_left_corner + ((_horizontial * u) + (vertical * v))));
+
+                vecfloat p = r.point_at_parameter(2.0);
+                vecfloat col = color(r, world);
+            }
+            col /= ns;
+            col = col._magnitude();
 
             int ir = int(255.99 * col.get_x());
             int ig = int(255.99 * col.get_y());
