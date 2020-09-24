@@ -16,12 +16,13 @@ vecfloat random_in_unit_sphere()
 {
 
     vecfloat p(0, 0, 0);
+    ///Random number generator for reflections
     std::random_device rd;
 
     std::uniform_real_distribution<> rn1(0, 1);
     std::uniform_real_distribution<> rn2(0, 1);
     std::uniform_real_distribution<> rn3(0, 1);
-    while (true)
+    do
     {
         std::mt19937 gen(rd());
 
@@ -34,16 +35,12 @@ vecfloat random_in_unit_sphere()
         std::cout << z << std::endl;
         p = (vecfloat((float)x, (float)y, (float)z) * (float)2.0) - vecfloat(1.0f, 1.0f, 1.0f);
 
-        if (p.magnitude() >= 1.0)
-        {
-            std::cout << "it worked" << std::endl;
-            break;
-        }
-    }
+        std::cout << (double)p.squared_length() << std::endl;
+    } while ((double)p.squared_length() <= 1.0);
     std::cout << "it broke returning" << std::endl;
     return p;
 }
-vecfloat color(const ray &r, hittable *world)
+vecfloat color(const ray &r, hittable_list *world)
 {
 
     hit_record rec;
@@ -53,13 +50,14 @@ vecfloat color(const ray &r, hittable *world)
     // float t = 0.5 * (unit_direction.get_y() + 1.0);
     if (world->hit(r, 0.0, 100.0, rec))
     {
+        std::cout << "Is this working" << std::endl;
         vecfloat target = (rec.p + rec.normal) + random_in_unit_sphere();
         //Recursive function that models real time shadows
         return color(ray(rec.p, target - rec.p), world) * 0.5;
-        //  return vecfloat(rec.normal.get_x() + 1, rec.normal.get_y() + 1, rec.normal.get_z() + 1) * (float)0.5;
     }
     else
     {
+
         vecfloat unit_direction(0, 0, 0);
         unit_direction.unit_vector(r.direction());
         float t = 0.5 * (rec.normal.get_y() + 1.0);
@@ -72,7 +70,7 @@ int main()
 
     int nx = 200;
     int ny = 100;
-    float ns = 200;
+    float ns = 100;
 
     std::random_device rd;
     std::uniform_real_distribution<> rn1(0, 1);
@@ -107,15 +105,13 @@ int main()
 
                 float u = float(j + x) / float(nx);
                 float v = float(i + y) / float(ny);
-                // Not working as of now due to ray not returning a value.
 
                 ray r(origin, (lower_left_corner + ((_horizontial * u) + (vertical * v))));
 
                 vecfloat p = r.point_at_parameter(2.0);
-                vecfloat col = color(r, world);
+                col += color(r, static_cast<hittable_list *>(world));
             }
-            col /= ns;
-            col = col._magnitude();
+            col /= float(ns);
 
             int ir = int(255.99 * col.get_x());
             int ig = int(255.99 * col.get_y());
