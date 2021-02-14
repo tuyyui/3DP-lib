@@ -1,9 +1,23 @@
-# RayCast-lib
-Ray-tracing renderer library code in C++.
+# RayCast-Library
+Ray-tracer library in C++.
+
+# Dependencies
+
+* C++ compiler
+* C++ 11/20
+* optional Git
+
+Libraries:
+
+* STL
+
+# Follow-along
+
+In this project I'm following this pdf book https://www.realtimerendering.com/raytracing/Ray%20Tracing%20in%20a%20Weekend.pdf to build it out while adding my own custom code that's scales and is faster.
 
 # Output files
 
-Output files can only be opened with selected programs. It will act as the location where your raycasted shape will be rendered.
+Files will be outputted through a *ppm* file.
 
 
 
