@@ -3,8 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
-//RAYTRACER DURR engine
-/// LOOK I KNOW IT'S A RAYTRACER BUT I'M A DUMMY AND KEEP GETTING THE NAMES MIXED UP DON'T GET MAD AT ME.
+//*Raytracer I named it wrong sorry
 namespace raycast
 {
     template <typename T>
